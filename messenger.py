@@ -14,14 +14,15 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://ytmtzbmi:hYQolEPk4i-pFB8XExO
 db = SQLAlchemy(app)
 
 class token_reg(db.Model):
-	token = db.Column(db.Integer, primary_key=True)
-	usernames = db.Column(db.String, unique=True)
+	token = db.Column(db.Integer, primary_key=True, autoincrement=True)
+	usernames = db.Column(db.String)
 
-	def __init__(self, username):
-		self.usernames = usernames
+	# def __init__(self, username):
+	# 	self.usernames = username
 
 	def __repr__(self):
 		return '<User %r>' % self.username
+
 
 admin = Admin(app, name='token_panel', template_mode='bootstrap3')
 admin.add_view(ModelView(token_reg, db.session))
@@ -55,7 +56,7 @@ def verify_Webhook():
 							token_row = token_reg.query.get(i) #return an object of the token_reg table (row)
 							users = token_row.usernames.split(',')    
 							if user_id_curr in users:
-								pass:
+								pass
 							else:
 								token_row.usernames = token_row.usernames + "," + user_id_curr
 								db.session.add(token_row)
