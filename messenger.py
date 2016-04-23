@@ -54,14 +54,20 @@ def verify_Webhook():
 						if tok.isdigit():
 							i = int(tok)
 							token_row = token_reg.query.get(i) #return an object of the token_reg table (row)
-							users = token_row.usernames.split(',')    
-							if user_id_curr in users:
-								pass
+							if token_row.usernames:
+								users = token_row.usernames.split(',')    
+								if user_id_curr in users:
+									pass
+								else:
+									token_row.usernames = token_row.usernames + "," + user_id_curr
+									db.session.add(token_row)
+									db.session.commit()
 							else:
-								token_row.usernames = token_row.usernames + "," + user_id_curr
+								token_row.usernames = user_id_curr
 								db.session.add(token_row)
 								db.session.commit()
-				
+
+
 			reply("token registered")
 
 		return "Done!"
