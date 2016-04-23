@@ -21,7 +21,7 @@ class token_reg(db.Model):
 	# 	self.usernames = username
 
 	def __repr__(self):
-		return '<User %r>' % self.username
+		return '<User %r>' % self.usernames
 
 
 admin = Admin(app, name='token_panel', template_mode='bootstrap3')
@@ -42,11 +42,11 @@ def verify_Webhook():
 			messaging_events = content['entry'][0]['messaging']
 		except:
 			print "Error in get messaging events"
-		print messaging_events
+		# print messaging_events
 		for event in messaging_events:
 			if 'message' in event and 'text' in event['message']:
-				user_id_curr = str(event['sender']['id'])
-				session['recipient'] = event['sender']['id']
+				userid = event['sender']['id']
+				user_id_curr = str(userid)
 				
 				if event['message']['text']:
 					tok_str = event['message']['text'].split(',')
@@ -60,15 +60,15 @@ def verify_Webhook():
 									pass
 								else:
 									token_row.usernames = token_row.usernames + "," + user_id_curr
-									db.session.add(token_row)
+									# db.session.add(token_row)
 									db.session.commit()
-							else:
+							else: # for first time the token is used
 								token_row.usernames = user_id_curr
-								db.session.add(token_row)
+								# db.session.add(token_row)
 								db.session.commit()
 
 
-			reply("token registered")
+				reply("token registered",userid)
 
 		return "Done!"
 
@@ -81,13 +81,34 @@ def verify_Webhook():
 
 
 #Function that sends bot reply back to messenger
-def reply(msg):
+def reply(msg,userid):
 	messageData = {"text":msg}
 	token = {"access_token":"CAADMARK7AawBAFZCiwNRiReYd94VDe1N1NrNdmGETGvd2fTZBmBbPjv6cLZBCo15ZA4FKuxdU2ydh6Ug3vqy9ig0rvQQaJc8BwJjZC0rlZA5lMCAxpmmscyNkclDQZAWulOXOqjfkGoo4XEGOCHNwjOLMqwxJ91ZCtr0OA61ZCAzv7m8J7t5GSfZCPZBjt75bNNyrruawv0KaSnrAZDZD"}
-	content = {"recipient":{'id':session['recipient']}, "message":messageData}
+	content = {"recipient":{'id':userid}, "message":messageData}
 	print content
 	r =  requests.post('https://graph.facebook.com/v2.6/me/messages',params=token,json=content)
 	print r.status_code
+
+@app.route('/ready',methods=['GET','POST'])
+def dataFromPi():
+	if request.method == 'POST':
+		i = request.form['token']
+		i = int(i)
+		token_row = token_reg.query.get(i) #return an object of the token_reg table (row)
+		if token_row.usernames:
+			users = token_row.usernames.split(',')
+			for user in users:
+				s = text('Your token no. %d is ready',i)
+				reply(s,int(user))
+
+			token_row.usernames = None
+			db.session.commit()
+
+		else:
+			print "No body registered with for this token"
+
+
+	return "Got it!!"
 
 
 port = int(os.getenv('VCAP_APP_PORT', 8080))
