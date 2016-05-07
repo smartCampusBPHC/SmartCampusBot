@@ -67,7 +67,6 @@ def verify_Webhook():
 								# db.session.add(token_row)
 								db.session.commit()
 
-
 				reply("token registered",userid)
 
 		return "Done!"
@@ -92,20 +91,21 @@ def reply(msg,userid):
 @app.route('/ready',methods=['GET','POST'])
 def dataFromPi():
 	if request.method == 'POST':
+
 		i = request.form['token']
 		i = int(i)
 		token_row = token_reg.query.get(i) #return an object of the token_reg table (row)
 		if token_row.usernames:
 			users = token_row.usernames.split(',')
 			for user in users:
-				s = text('Your token no. %d is ready',i)
+				s = 'Your token no. {} is ready'.format(i)
 				reply(s,int(user))
 
 			token_row.usernames = None
 			db.session.commit()
 
 		else:
-			print "No body registered with for this token"
+			print "No body registered for this token"
 
 
 	return "Got it!!"
