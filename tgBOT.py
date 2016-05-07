@@ -14,7 +14,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 job_queue = None
 
-TOKEN = "236847067:AAHDRYJZDYn21-MFPwp-w50_K8lwOZfD2oU"
+TOKEN = "YourTokenHere"
 
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
