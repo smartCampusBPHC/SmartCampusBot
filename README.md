@@ -4,7 +4,7 @@ Libraris used :
  - [flask] (http://flask.pocoo.org/docs/0.10/quickstart/)
  - [python-telegram-bot] (https://github.com/python-telegram-bot/python-telegram-bot)
 
-## Desciption (Notification proxy) : ##
+## Description (Notification proxy) : ##
 This a python implementation for a telegram bot backend connecting to [SmartCampusBot] (https://telegram.me/SmartCampusBot>) in conjucture with a [flask] (http://flask.pocoo.org/docs/0.10/quickstart/) web app. for Bits Pilani Hyderabad Campus. It provides food status notification for Mess1 - All night Canteen(anc). (Running from 10pm to 2am). This works in collaboration with the [all_night_canteen_oder_notification] (https://github.com/smartCampusBPHC/all_night_canteen_order_notification>). Currently its running on [IBM Bluemix] (mess1-bot.mybluemix.net)
 
 ## Working: ##
