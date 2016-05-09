@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
 import telegram
-from telegram.ext import Updater, CommandHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
 import urllib
 import json as m_json
+import globalStructs
+# import messenger
 
 # Enable logging
 logging.basicConfig(
@@ -13,81 +15,45 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 job_queue = None
+updater = None
 
-TOKEN = "YourTokenHere"
+TOKEN = "212506256:AAGnzNLnO7ZVuIik61OXlAx57WxLMbQ8h10"
 
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
 def start(bot, update):
 	bot.sendMessage(update.message.chat_id, text='Hi! Use /token <token number> to '
 												 'register for a token')
-
-def google(bot,update,args): # google <search term>
-    '''Returns the link and the description of the first result from a google
-    search
-    '''
-    query=args[0]
-    print "going to google %s" % query
-
-
-def wiki(bot,update,args): # wiki <search term>
-
-    query=args[0]
-    print "going to wiki %s" % query
-
-def ready(bot,update,args):
-	chat_id = update.message.chat_id
-	try:
-		# args[0] should contain the time for the timer in seconds
-		print args
-		due = args[0]
-		# print due
-		due = int(due)
-		# print due
-		if due < 1 or due > 100:
-			bot.sendMessage(chat_id, text='Please enter valid token number!')
-			return
-		# print chat_id
-		# def alam(bot,token):
-		#     """ Inner function to send the alarm message """
-		#     bot.sendMessage(chat_id, text='Hola! Your food for token:' + token + ' is ready! Have a nice meal')
-
-		# Add job to queue
-		# job_queue.put(alam, due)
-
-		
-		bot.sendMessage(chat_id, text='Token "'+ str(due) +'" successfully registered !')
-
-	except IndexError:
-		bot.sendMessage(chat_id, text='Usage: /token <token number>')
-	except ValueError:
-		bot.sendMessage(chat_id, text='Please enter valid token number!')
-
-
+def echo(bot, update):
+  bot.sendMessage(update.message.chat_id, text=update.message.text)
 
 def token(bot, update, args):
 	chat_id = update.message.chat_id
 	try:
-		# args[0] should contain the time for the timer in seconds
-		print args
-		due = args[0]
-		# print due
-		due = int(due)
-		# print due
-		if due < 1 or due > 100:
+		print args[0]
+		tok = int(args[0])
+		if tok > 0 and tok <= 100:
+			newUser = next((usr for usr in globalStructs.userList[tok] if usr.userId == chat_id), None)
+			# print "new User = " + str(newUser.userId)
+			if newUser == None:
+				# print "inside if"
+				newUser = globalStructs.User(chat_id, globalStructs.method[1])
+				globalStructs.userList[tok].append(newUser)
+				bot.sendMessage(chat_id, text='Token '+ str(tok) +' successfully registered !')
+			else:
+				bot.sendMessage(chat_id, text='Token '+ str(tok) +' already registered !')
+		else:
 			bot.sendMessage(chat_id, text='Please enter valid token number!')
 			return
-		# def alam(bot,token):
-		#     """ Inner function to send the alarm message """
-		#     bot.sendMessage(chat_id, text='Hola! Your food for token:' + token + ' is ready! Have a nice meal')
-
-		
-		bot.sendMessage(chat_id, text='Token "'+ str(due) +'" successfully registered !')
-
+	
 	except IndexError:
 		bot.sendMessage(chat_id, text='Usage: /token <token number>')
 	except ValueError:
 		bot.sendMessage(chat_id, text='Please enter valid token number!')
+
+def reply(chat_id,msg):
+	updater.bot.sendMessage(chat_id,text=msg)
+
 
 
 def error(bot, update, error):
@@ -95,8 +61,9 @@ def error(bot, update, error):
 
 
 def main():
+	print "Thread started"	
 	global job_queue
-
+	global updater
 	updater = Updater(TOKEN)
 	# job_queue = updater.job_queue
 
@@ -107,8 +74,8 @@ def main():
 	dp.addHandler(CommandHandler("start", start))
 	dp.addHandler(CommandHandler("help", start))
 	dp.addHandler(CommandHandler("token", token, pass_args=True))
-	dp.addHandler(CommandHandler("google", google, pass_args=True))
-	dp.addHandler(CommandHandler("wiki", wiki, pass_args=True))
+	# on noncommand i.e message - echo the message on Telegram
+ 	dp.addHandler(MessageHandler([Filters.text], echo))	
 
 	# log all errors
 	dp.addErrorHandler(error)
@@ -119,7 +86,7 @@ def main():
 	# Block until the you presses Ctrl-C or the process receives SIGINT,
 	# SIGTERM or SIGABRT. This should be used most of the time, since
 	# start_polling() is non-blocking and will stop the bot gracefully.
-	updater.idle()
+	# updater.idle()
 
 if __name__ == '__main__':
 	main()
